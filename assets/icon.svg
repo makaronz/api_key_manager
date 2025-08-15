@@ -1,0 +1,34 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#3B82F6" stroke="#1E40AF" stroke-width="8"/>
+  
+  <!-- Key icon -->
+  <g transform="translate(156, 156)">
+    <!-- Key head (circle) -->
+    <circle cx="50" cy="50" r="40" fill="none" stroke="white" stroke-width="8"/>
+    <circle cx="50" cy="50" r="20" fill="none" stroke="white" stroke-width="6"/>
+    
+    <!-- Key shaft -->
+    <rect x="90" y="44" width="120" height="12" fill="white" rx="6"/>
+    
+    <!-- Key teeth -->
+    <rect x="180" y="56" width="20" height="16" fill="white"/>
+    <rect x="160" y="56" width="12" height="12" fill="white"/>
+  </g>
+  
+  <!-- Lock icon overlay -->
+  <g transform="translate(300, 300)">
+    <!-- Lock body -->
+    <rect x="0" y="20" width="60" height="50" fill="white" rx="8"/>
+    
+    <!-- Lock shackle -->
+    <path d="M15 20 C15 5, 45 5, 45 20" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- Lock keyhole -->
+    <circle cx="30" cy="40" r="6" fill="#3B82F6"/>
+    <rect x="27" y="40" width="6" height="12" fill="#3B82F6" rx="3"/>
+  </g>
+  
+  <!-- API text -->
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white">API</text>
+</svg>
