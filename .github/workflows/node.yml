@@ -1,0 +1,35 @@
+name: Node CI
+on: [push, pull_request]
+
+jobs:
+  build-test-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint --if-present
+      - run: npm run typecheck --if-present
+      - run: npm run test:web --if-present
+      - name: Gitleaks (warn-only)
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz | tar -xz && ./gitleaks detect --no-git -v || true
+      - name: Semgrep (warn-only)
+        run: |
+          curl -sL https://semgrep.dev/install.sh | sh
+          ./semgrep ci --severity=ERROR || true
+
+  package-macos:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run electron:pack --if-present
