@@ -20,7 +20,7 @@ jobs:
       - name: Semgrep (warn-only)
         run: |
           curl -sL https://semgrep.dev/install.sh | sh
-          ./semgrep ci --severity=ERROR || true
+          semgrep ci --severity=ERROR || true
 
   package-macos:
     if: github.event_name == 'workflow_dispatch'
