@@ -10,8 +10,10 @@
 | Context isolation | `contextIsolation: true`, `nodeIntegration: false` (`electron/main.ts`) |
 | Web security flags | `webSecurity: true`, `allowRunningInsecureContent: false` |
 | Window creation | `setWindowOpenHandler(() => ({ action: 'deny' }))` prevents pop-ups |
-| CSP | `<meta http-equiv="Content-Security-Policy" ...>` in `index.html`<br>``default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:;`` |
+| CSP | `<meta http-equiv="Content-Security-Policy" ...>` in `index.html`<br>``default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';`` |
 | macOS hardening | Hardened runtime + entitlements in `assets/entitlements.mac.plist`; targets defined in `package.json → build.mac` |
+- Prefer CSP: `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'` (tighten `connect-src` to explicit hosts when remote APIs are introduced).
+- Validate URLs passed to `system.openExternal` against an allowlist of `https:` origins; reject custom schemes.
 
 ## Secrets & storage
 - **Desktop:** Secrets stored with `keytar` in macOS Keychain under service `API-Key-Manager-<service>`.

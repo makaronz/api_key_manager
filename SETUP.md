@@ -1,3 +1,4 @@
+> Note: Currently scripts use npm. V2 will migrate to pnpm workspaces.
 # api_key_manager — SETUP
 
 ## Prerequisites
@@ -6,7 +7,7 @@
 
 ## Install
 ```bash
-cd /Users/arkadiuszfudali/Git/api_key_manager
+cd api_key_manager
 npm install          # installs root + electron deps
 ```
 
