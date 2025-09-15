@@ -75,7 +75,7 @@ Scripts defined in root `package.json`.
 ## 9. Security Notes  
 - **Context Isolation** enabled; `nodeIntegration` disabled.  
 - Preload whitelist only exposes safe IPC; validate inputs in **main**.  
-- Credentials saved with **keytar** (desktop) or `IndexedDB` encrypted mock (web).  
+- Credentials saved with **keytar** (desktop). Web fallback is current `localStorage`; Target (V2): encrypted IndexedDB.
 - Secrets never persist in Zustand; reset on app quit / browser tab close.  
 - Gitleaks & Semgrep run in CI (warn-only initially).
 
