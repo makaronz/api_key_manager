@@ -1,5 +1,5 @@
 import { ApiKey, FileOperationResult } from '../types';
-import { apiServices } from '../data/apiServices';
+import { apiServices, getServiceByKeyName } from '../data/apiServices';
 
 /**
  * Parse .env file content into API keys
@@ -31,12 +31,11 @@ export const parseEnvFile = (content: string): Record<string, ApiKey> => {
       value = value.slice(1, -1);
     }
     
-    // Map environment variable names to service IDs
-    const serviceId = mapEnvKeyToServiceId(key);
-    if (serviceId && value) {
-      keys[serviceId] = {
-        id: serviceId,
-        service: serviceId,
+    const service = getServiceByKeyName(key);
+    if (service && value) {
+      keys[service.id] = {
+        id: service.id,
+        service: service.id,
         value,
         isValid: undefined,
         lastTested: undefined,
@@ -63,17 +62,16 @@ export const generateEnvContent = (keys: Record<string, ApiKey>): string => {
   const categories = new Set(apiServices.map(s => s.category));
   
   for (const category of Array.from(categories).sort()) {
-    const categoryServices = apiServices.filter(s => s.category === category);
-    const categoryHasKeys = categoryServices.some(s => keys[s.id]?.value);
-    
+    const categoryServices = apiServices.filter((s) => s.category === category);
+    const categoryHasKeys = categoryServices.some((s) => keys[s.id]?.value);
+
     if (categoryHasKeys) {
-      lines.push(`# ${category.charAt(0).toUpperCase() + category.slice(1)} Services`);
-      
+      lines.push(`# ${category}`);
+
       for (const service of categoryServices) {
         const key = keys[service.id];
         if (key?.value) {
-          const envKey = mapServiceIdToEnvKey(service.id);
-          lines.push(`${envKey}=${key.value}`);
+          lines.push(`${service.keyName}=${key.value}`);
         }
       }
       
@@ -88,54 +86,15 @@ export const generateEnvContent = (keys: Record<string, ApiKey>): string => {
  * Map environment variable names to service IDs
  */
 const mapEnvKeyToServiceId = (envKey: string): string | null => {
-  const mapping: Record<string, string> = {
-    'OPENAI_API_KEY': 'openai',
-    'ANTHROPIC_API_KEY': 'anthropic',
-    'GITHUB_TOKEN': 'github',
-    'GITHUB_API_KEY': 'github',
-    'STRIPE_SECRET_KEY': 'stripe',
-    'STRIPE_API_KEY': 'stripe',
-    'BINANCE_API_KEY': 'binance',
-    'COINBASE_API_KEY': 'coinbase',
-    'SENDGRID_API_KEY': 'sendgrid',
-    'TWILIO_AUTH_TOKEN': 'twilio',
-    'TWILIO_API_KEY': 'twilio',
-    'AWS_ACCESS_KEY_ID': 'aws',
-    'AWS_SECRET_ACCESS_KEY': 'aws',
-    'GOOGLE_CLOUD_API_KEY': 'google-cloud',
-    'GOOGLE_API_KEY': 'google-cloud',
-    'DISCORD_BOT_TOKEN': 'discord',
-    'DISCORD_API_KEY': 'discord',
-    'SLACK_BOT_TOKEN': 'slack',
-    'SLACK_API_KEY': 'slack',
-    'SUPABASE_ANON_KEY': 'supabase',
-    'SUPABASE_SERVICE_ROLE_KEY': 'supabase'
-  };
-  
-  return mapping[envKey.toUpperCase()] || null;
+  return getServiceByKeyName(envKey)?.id ?? null;
 };
 
 /**
  * Map service IDs to environment variable names
  */
 const mapServiceIdToEnvKey = (serviceId: string): string => {
-  const mapping: Record<string, string> = {
-    'openai': 'OPENAI_API_KEY',
-    'anthropic': 'ANTHROPIC_API_KEY',
-    'github': 'GITHUB_TOKEN',
-    'stripe': 'STRIPE_SECRET_KEY',
-    'binance': 'BINANCE_API_KEY',
-    'coinbase': 'COINBASE_API_KEY',
-    'sendgrid': 'SENDGRID_API_KEY',
-    'twilio': 'TWILIO_AUTH_TOKEN',
-    'aws': 'AWS_ACCESS_KEY_ID',
-    'google-cloud': 'GOOGLE_CLOUD_API_KEY',
-    'discord': 'DISCORD_BOT_TOKEN',
-    'slack': 'SLACK_BOT_TOKEN',
-    'supabase': 'SUPABASE_ANON_KEY'
-  };
-  
-  return mapping[serviceId] || `${serviceId.toUpperCase().replace('-', '_')}_API_KEY`;
+  const service = apiServices.find((s) => s.id === serviceId);
+  return service?.keyName ?? `${serviceId.toUpperCase().replace(/-/g, '_')}`;
 };
 
 /**

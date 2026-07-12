@@ -1,3 +1,17 @@
+export type ServiceCategory =
+  | 'ai'
+  | 'development'
+  | 'crypto'
+  | 'social'
+  | 'cloud'
+  | 'other'
+  | 'openclaw-gateway'
+  | 'openclaw-providers'
+  | 'openclaw-channels'
+  | 'openclaw-tools';
+
+export type EnvFieldType = 'secret' | 'config' | 'boolean' | 'path' | 'url';
+
 // API Service Types
 export interface ApiService {
   id: string;
@@ -11,9 +25,13 @@ export interface ApiService {
   testEndpoint: string;
   testMethod: 'GET' | 'POST' | 'PUT' | 'DELETE';
   testHeaders: Record<string, string>;
-  testBody?: any;
-  category: 'ai' | 'development' | 'crypto' | 'social' | 'cloud' | 'other';
+  testBody?: Record<string, unknown>;
+  category: ServiceCategory;
   icon: string;
+  fieldType?: EnvFieldType;
+  isTestable?: boolean;
+  placeholder?: string;
+  group?: string;
 }
 
 // API Key Types
@@ -142,6 +160,5 @@ declare global {
 }
 
 // Utility Types
-export type ServiceCategory = ApiService['category'];
 export type TabType = UiStore['activeTab'];
 export type NotificationType = Notification['type'];

@@ -1,63 +1,8 @@
 import { ApiService } from '../types';
+import { openclawEnvFields } from './openclawEnvFields';
 
-export const apiServices: ApiService[] = [
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    keyName: 'OPENAI_API_KEY',
-    description: 'AI language models and GPT APIs',
-    website: 'https://platform.openai.com',
-    docsUrl: 'https://platform.openai.com/docs',
-    loginUrl: 'https://platform.openai.com/login',
-    keyUrl: 'https://platform.openai.com/api-keys',
-    testEndpoint: 'https://api.openai.com/v1/models',
-    testMethod: 'GET',
-    testHeaders: {
-      'Authorization': 'Bearer {key}'
-    },
-    category: 'ai',
-    icon: 'Bot'
-  },
-  {
-    id: 'anthropic',
-    name: 'Anthropic Claude',
-    keyName: 'ANTHROPIC_API_KEY',
-    description: 'Claude AI assistant and language models',
-    website: 'https://www.anthropic.com',
-    docsUrl: 'https://docs.anthropic.com',
-    loginUrl: 'https://console.anthropic.com',
-    keyUrl: 'https://console.anthropic.com/settings/keys',
-    testEndpoint: 'https://api.anthropic.com/v1/messages',
-    testMethod: 'POST',
-    testHeaders: {
-      'x-api-key': '{key}',
-      'anthropic-version': '2023-06-01'
-    },
-    testBody: {
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 1,
-      messages: [{ role: 'user', content: 'Hi' }]
-    },
-    category: 'ai',
-    icon: 'MessageSquare'
-  },
-  {
-    id: 'github',
-    name: 'GitHub',
-    keyName: 'GITHUB_TOKEN',
-    description: 'GitHub API for repositories and user data',
-    website: 'https://github.com',
-    docsUrl: 'https://docs.github.com/en/rest',
-    loginUrl: 'https://github.com/login',
-    keyUrl: 'https://github.com/settings/tokens',
-    testEndpoint: 'https://api.github.com/user',
-    testMethod: 'GET',
-    testHeaders: {
-      'Authorization': 'token {key}'
-    },
-    category: 'development',
-    icon: 'Github'
-  },
+/** Legacy / general-purpose API services (non-OpenClaw-specific). */
+const legacyApiServices: ApiService[] = [
   {
     id: 'stripe',
     name: 'Stripe',
@@ -69,28 +14,176 @@ export const apiServices: ApiService[] = [
     keyUrl: 'https://dashboard.stripe.com/apikeys',
     testEndpoint: 'https://api.stripe.com/v1/balance',
     testMethod: 'GET',
-    testHeaders: {
-      'Authorization': 'Bearer {key}'
-    },
+    testHeaders: { Authorization: 'Bearer {key}' },
     category: 'other',
-    icon: 'CreditCard'
+    icon: 'CreditCard',
+    fieldType: 'secret',
+    isTestable: true,
   },
   {
-    id: 'binance',
-    name: 'Binance',
+    id: 'binance-api-key',
+    name: 'Binance API Key',
     keyName: 'BINANCE_API_KEY',
-    description: 'Cryptocurrency exchange and trading APIs',
+    description: 'Binance exchange API key',
     website: 'https://www.binance.com',
     docsUrl: 'https://binance-docs.github.io/apidocs',
     loginUrl: 'https://accounts.binance.com/en/login',
     keyUrl: 'https://www.binance.com/en/my/settings/api-management',
     testEndpoint: 'https://api.binance.com/api/v3/account',
     testMethod: 'GET',
-    testHeaders: {
-      'X-MBX-APIKEY': '{key}'
-    },
+    testHeaders: { 'X-MBX-APIKEY': '{key}' },
     category: 'crypto',
-    icon: 'TrendingUp'
+    icon: 'TrendingUp',
+    fieldType: 'secret',
+    isTestable: true,
+    group: 'Binance',
+  },
+  {
+    id: 'binance-api-secret',
+    name: 'Binance API Secret',
+    keyName: 'BINANCE_API_SECRET',
+    description: 'Binance exchange API secret',
+    website: 'https://www.binance.com',
+    docsUrl: 'https://binance-docs.github.io/apidocs',
+    loginUrl: 'https://www.binance.com/en/my/settings/api-management',
+    keyUrl: 'https://www.binance.com/en/my/settings/api-management',
+    testEndpoint: '',
+    testMethod: 'GET',
+    testHeaders: {},
+    category: 'crypto',
+    icon: 'TrendingUp',
+    fieldType: 'secret',
+    isTestable: false,
+    group: 'Binance',
+  },
+  {
+    id: 'binance-testnet',
+    name: 'Binance Testnet',
+    keyName: 'BINANCE_TESTNET',
+    description: 'Set to "true" to use Binance testnet',
+    website: 'https://testnet.binance.vision',
+    docsUrl: 'https://testnet.binance.vision',
+    loginUrl: 'https://testnet.binance.vision',
+    keyUrl: 'https://testnet.binance.vision',
+    testEndpoint: '',
+    testMethod: 'GET',
+    testHeaders: {},
+    category: 'crypto',
+    icon: 'TrendingUp',
+    fieldType: 'boolean',
+    isTestable: false,
+    placeholder: 'true',
+    group: 'Binance',
+  },
+  {
+    id: 'bybit-api-key',
+    name: 'Bybit API Key',
+    keyName: 'BYBIT_API_KEY',
+    description: 'Bybit exchange API key',
+    website: 'https://www.bybit.com',
+    docsUrl: 'https://bybit-exchange.github.io/docs',
+    loginUrl: 'https://www.bybit.com/app/user/api-management',
+    keyUrl: 'https://www.bybit.com/app/user/api-management',
+    testEndpoint: 'https://api.bybit.com/v5/user/query-api',
+    testMethod: 'GET',
+    testHeaders: { 'X-BAPI-API-KEY': '{key}' },
+    category: 'crypto',
+    icon: 'TrendingUp',
+    fieldType: 'secret',
+    isTestable: true,
+    group: 'Bybit',
+  },
+  {
+    id: 'bybit-api-secret',
+    name: 'Bybit API Secret',
+    keyName: 'BYBIT_API_SECRET',
+    description: 'Bybit exchange API secret',
+    website: 'https://www.bybit.com',
+    docsUrl: 'https://bybit-exchange.github.io/docs',
+    loginUrl: 'https://www.bybit.com/app/user/api-management',
+    keyUrl: 'https://www.bybit.com/app/user/api-management',
+    testEndpoint: '',
+    testMethod: 'GET',
+    testHeaders: {},
+    category: 'crypto',
+    icon: 'TrendingUp',
+    fieldType: 'secret',
+    isTestable: false,
+    group: 'Bybit',
+  },
+  {
+    id: 'bybit-testnet',
+    name: 'Bybit Testnet',
+    keyName: 'BYBIT_TESTNET',
+    description: 'Set to "true" to use Bybit testnet',
+    website: 'https://testnet.bybit.com',
+    docsUrl: 'https://bybit-exchange.github.io/docs',
+    loginUrl: 'https://testnet.bybit.com',
+    keyUrl: 'https://testnet.bybit.com',
+    testEndpoint: '',
+    testMethod: 'GET',
+    testHeaders: {},
+    category: 'crypto',
+    icon: 'TrendingUp',
+    fieldType: 'boolean',
+    isTestable: false,
+    placeholder: 'true',
+    group: 'Bybit',
+  },
+  {
+    id: 'oanda-api-key',
+    name: 'OANDA API Key',
+    keyName: 'OANDA_API_KEY',
+    description: 'OANDA trading API key',
+    website: 'https://www.oanda.com',
+    docsUrl: 'https://developer.oanda.com/rest-live-v20/development-guide',
+    loginUrl: 'https://www.oanda.com/account/tpa/personal_token',
+    keyUrl: 'https://www.oanda.com/account/tpa/personal_token',
+    testEndpoint: 'https://api-fxtrade.oanda.com/v3/accounts',
+    testMethod: 'GET',
+    testHeaders: { Authorization: 'Bearer {key}' },
+    category: 'crypto',
+    icon: 'TrendingUp',
+    fieldType: 'secret',
+    isTestable: true,
+    group: 'OANDA',
+  },
+  {
+    id: 'oanda-account-id',
+    name: 'OANDA Account ID',
+    keyName: 'OANDA_ACCOUNT_ID',
+    description: 'OANDA account identifier',
+    website: 'https://www.oanda.com',
+    docsUrl: 'https://developer.oanda.com/rest-live-v20/account-ep',
+    loginUrl: 'https://www.oanda.com',
+    keyUrl: 'https://developer.oanda.com/rest-live-v20/account-ep',
+    testEndpoint: '',
+    testMethod: 'GET',
+    testHeaders: {},
+    category: 'crypto',
+    icon: 'TrendingUp',
+    fieldType: 'config',
+    isTestable: false,
+    group: 'OANDA',
+  },
+  {
+    id: 'oanda-env',
+    name: 'OANDA Environment',
+    keyName: 'OANDA_ENV',
+    description: 'OANDA environment: "practice" or "live"',
+    website: 'https://www.oanda.com',
+    docsUrl: 'https://developer.oanda.com/rest-live-v20/development-guide',
+    loginUrl: 'https://www.oanda.com',
+    keyUrl: 'https://developer.oanda.com/rest-live-v20/development-guide',
+    testEndpoint: '',
+    testMethod: 'GET',
+    testHeaders: {},
+    category: 'crypto',
+    icon: 'TrendingUp',
+    fieldType: 'config',
+    isTestable: false,
+    placeholder: 'practice',
+    group: 'OANDA',
   },
   {
     id: 'coinbase',
@@ -103,11 +196,45 @@ export const apiServices: ApiService[] = [
     keyUrl: 'https://www.coinbase.com/settings/api',
     testEndpoint: 'https://api.coinbase.com/v2/user',
     testMethod: 'GET',
-    testHeaders: {
-      'Authorization': 'Bearer {key}'
-    },
+    testHeaders: { Authorization: 'Bearer {key}' },
     category: 'crypto',
-    icon: 'Coins'
+    icon: 'Coins',
+    fieldType: 'secret',
+    isTestable: true,
+  },
+  {
+    id: 'github-token',
+    name: 'GitHub Token',
+    keyName: 'GITHUB_TOKEN',
+    description: 'GitHub personal access token',
+    website: 'https://github.com',
+    docsUrl: 'https://docs.github.com/en/rest',
+    loginUrl: 'https://github.com/login',
+    keyUrl: 'https://github.com/settings/tokens',
+    testEndpoint: 'https://api.github.com/user',
+    testMethod: 'GET',
+    testHeaders: { Authorization: 'token {key}' },
+    category: 'development',
+    icon: 'Github',
+    fieldType: 'secret',
+    isTestable: true,
+  },
+  {
+    id: 'github-access-token',
+    name: 'GitHub Access Token',
+    keyName: 'GITHUB_ACCESS_TOKEN',
+    description: 'GitHub access token alias (GITHUB_ACCESS_TOKEN)',
+    website: 'https://github.com',
+    docsUrl: 'https://docs.github.com/en/rest',
+    loginUrl: 'https://github.com/login',
+    keyUrl: 'https://github.com/settings/tokens',
+    testEndpoint: 'https://api.github.com/user',
+    testMethod: 'GET',
+    testHeaders: { Authorization: 'token {key}' },
+    category: 'development',
+    icon: 'Github',
+    fieldType: 'secret',
+    isTestable: true,
   },
   {
     id: 'sendgrid',
@@ -120,11 +247,11 @@ export const apiServices: ApiService[] = [
     keyUrl: 'https://app.sendgrid.com/settings/api_keys',
     testEndpoint: 'https://api.sendgrid.com/v3/user/profile',
     testMethod: 'GET',
-    testHeaders: {
-      'Authorization': 'Bearer {key}'
-    },
+    testHeaders: { Authorization: 'Bearer {key}' },
     category: 'social',
-    icon: 'Mail'
+    icon: 'Mail',
+    fieldType: 'secret',
+    isTestable: true,
   },
   {
     id: 'twilio',
@@ -137,28 +264,45 @@ export const apiServices: ApiService[] = [
     keyUrl: 'https://console.twilio.com/project/api-keys',
     testEndpoint: 'https://api.twilio.com/2010-04-01/Accounts.json',
     testMethod: 'GET',
-    testHeaders: {
-      'Authorization': 'Basic {key}'
-    },
+    testHeaders: { Authorization: 'Basic {key}' },
     category: 'social',
-    icon: 'Phone'
+    icon: 'Phone',
+    fieldType: 'secret',
+    isTestable: true,
   },
   {
     id: 'aws',
-    name: 'AWS',
+    name: 'AWS Access Key',
     keyName: 'AWS_ACCESS_KEY_ID',
-    description: 'Amazon Web Services cloud APIs',
+    description: 'Amazon Web Services access key ID',
     website: 'https://aws.amazon.com',
     docsUrl: 'https://docs.aws.amazon.com',
     loginUrl: 'https://console.aws.amazon.com',
     keyUrl: 'https://console.aws.amazon.com/iam/home#/security_credentials',
     testEndpoint: 'https://sts.amazonaws.com',
     testMethod: 'POST',
-    testHeaders: {
-      'Authorization': 'AWS4-HMAC-SHA256 {key}'
-    },
+    testHeaders: { Authorization: 'AWS4-HMAC-SHA256 {key}' },
     category: 'cloud',
-    icon: 'Cloud'
+    icon: 'Cloud',
+    fieldType: 'secret',
+    isTestable: false,
+  },
+  {
+    id: 'aws-secret',
+    name: 'AWS Secret Access Key',
+    keyName: 'AWS_SECRET_ACCESS_KEY',
+    description: 'Amazon Web Services secret access key',
+    website: 'https://aws.amazon.com',
+    docsUrl: 'https://docs.aws.amazon.com',
+    loginUrl: 'https://console.aws.amazon.com/iam/home#/security_credentials',
+    keyUrl: 'https://console.aws.amazon.com/iam/home#/security_credentials',
+    testEndpoint: '',
+    testMethod: 'GET',
+    testHeaders: {},
+    category: 'cloud',
+    icon: 'Cloud',
+    fieldType: 'secret',
+    isTestable: false,
   },
   {
     id: 'google-cloud',
@@ -171,74 +315,111 @@ export const apiServices: ApiService[] = [
     keyUrl: 'https://console.cloud.google.com/apis/credentials',
     testEndpoint: 'https://cloudresourcemanager.googleapis.com/v1/projects',
     testMethod: 'GET',
-    testHeaders: {
-      'Authorization': 'Bearer {key}'
-    },
+    testHeaders: { Authorization: 'Bearer {key}' },
     category: 'cloud',
-    icon: 'Cloud'
+    icon: 'Cloud',
+    fieldType: 'secret',
+    isTestable: true,
   },
   {
-    id: 'discord',
-    name: 'Discord',
-    keyName: 'DISCORD_BOT_TOKEN',
-    description: 'Discord bot and application APIs',
-    website: 'https://discord.com',
-    docsUrl: 'https://discord.com/developers/docs',
-    loginUrl: 'https://discord.com/login',
-    keyUrl: 'https://discord.com/developers/applications',
-    testEndpoint: 'https://discord.com/api/v10/users/@me',
-    testMethod: 'GET',
-    testHeaders: {
-      'Authorization': 'Bot {key}'
-    },
-    category: 'social',
-    icon: 'MessageCircle'
-  },
-  {
-    id: 'slack',
-    name: 'Slack',
-    keyName: 'SLACK_BOT_TOKEN',
-    description: 'Slack workspace and bot APIs',
-    website: 'https://slack.com',
-    docsUrl: 'https://api.slack.com',
-    loginUrl: 'https://slack.com/signin',
-    keyUrl: 'https://api.slack.com/apps',
-    testEndpoint: 'https://slack.com/api/auth.test',
-    testMethod: 'POST',
-    testHeaders: {
-      'Authorization': 'Bearer {key}'
-    },
-    category: 'social',
-    icon: 'MessageSquare'
-  },
-  {
-    id: 'supabase',
-    name: 'Supabase',
+    id: 'supabase-anon',
+    name: 'Supabase Anon Key',
     keyName: 'SUPABASE_ANON_KEY',
-    description: 'Backend-as-a-Service and database APIs',
+    description: 'Supabase anonymous/public API key',
     website: 'https://supabase.com',
     docsUrl: 'https://supabase.com/docs',
     loginUrl: 'https://app.supabase.com/sign-in',
     keyUrl: 'https://app.supabase.com/project/_/settings/api',
-    testEndpoint: 'https://your-project.supabase.co/rest/v1/',
+    testEndpoint: '',
     testMethod: 'GET',
-    testHeaders: {
-      'apikey': '{key}',
-      'Authorization': 'Bearer {key}'
-    },
+    testHeaders: {},
     category: 'other',
-    icon: 'Database'
-  }
+    icon: 'Database',
+    fieldType: 'secret',
+    isTestable: false,
+  },
+  {
+    id: 'supabase-service-role',
+    name: 'Supabase Service Role Key',
+    keyName: 'SUPABASE_SERVICE_ROLE_KEY',
+    description: 'Supabase service role key (server-side only)',
+    website: 'https://supabase.com',
+    docsUrl: 'https://supabase.com/docs',
+    loginUrl: 'https://app.supabase.com/sign-in',
+    keyUrl: 'https://app.supabase.com/project/_/settings/api',
+    testEndpoint: '',
+    testMethod: 'GET',
+    testHeaders: {},
+    category: 'other',
+    icon: 'Database',
+    fieldType: 'secret',
+    isTestable: false,
+  },
+  {
+    id: 'supabase-url',
+    name: 'Supabase URL',
+    keyName: 'SUPABASE_URL',
+    description: 'Supabase project URL',
+    website: 'https://supabase.com',
+    docsUrl: 'https://supabase.com/docs',
+    loginUrl: 'https://app.supabase.com',
+    keyUrl: 'https://app.supabase.com/project/_/settings/api',
+    testEndpoint: '',
+    testMethod: 'GET',
+    testHeaders: {},
+    category: 'other',
+    icon: 'Database',
+    fieldType: 'url',
+    isTestable: false,
+    placeholder: 'https://your-project.supabase.co',
+  },
 ];
 
+function mergeServices(...groups: ApiService[][]): ApiService[] {
+  const byKeyName = new Map<string, ApiService>();
+  for (const group of groups) {
+    for (const service of group) {
+      byKeyName.set(service.keyName.toUpperCase(), service);
+    }
+  }
+  return Array.from(byKeyName.values());
+}
+
+/** All managed env fields: OpenClaw ~/.openclaw/.env + legacy services. */
+export const apiServices: ApiService[] = mergeServices(openclawEnvFields, legacyApiServices);
+
 export const getServiceById = (id: string): ApiService | undefined => {
-  return apiServices.find(service => service.id === id);
+  return apiServices.find((service) => service.id === id);
+};
+
+export const getServiceByKeyName = (keyName: string): ApiService | undefined => {
+  return apiServices.find(
+    (service) => service.keyName.toUpperCase() === keyName.toUpperCase(),
+  );
 };
 
 export const getServicesByCategory = (category: string): ApiService[] => {
-  return apiServices.filter(service => service.category === category);
+  return apiServices.filter((service) => service.category === category);
 };
 
 export const getAllCategories = (): string[] => {
-  return Array.from(new Set(apiServices.map(service => service.category)));
+  return Array.from(new Set(apiServices.map((service) => service.category)));
+};
+
+export const CATEGORY_LABELS: Record<string, string> = {
+  all: 'All Categories',
+  ai: 'AI',
+  development: 'Development',
+  crypto: 'Crypto & Trading',
+  social: 'Social & Email',
+  cloud: 'Cloud',
+  other: 'Other',
+  'openclaw-gateway': 'OpenClaw — Gateway & Paths',
+  'openclaw-providers': 'OpenClaw — Model Providers',
+  'openclaw-channels': 'OpenClaw — Channels',
+  'openclaw-tools': 'OpenClaw — Tools & Voice',
+};
+
+export const getCategoryLabel = (category: string): string => {
+  return CATEGORY_LABELS[category] ?? category;
 };

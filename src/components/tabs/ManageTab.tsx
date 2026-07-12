@@ -4,7 +4,7 @@ import { useApiKeyStore } from '../../stores/apiKeyStore';
 import { useUiStore } from '../../stores/uiStore';
 import ApiKeyCard from '../ApiKeyCard';
 
-import { apiServices, getAllCategories } from '../../data/apiServices';
+import { apiServices, getAllCategories, getCategoryLabel } from '../../data/apiServices';
 
 export const ManageTab: React.FC = () => {
   const [importContent, setImportContent] = useState('');
@@ -72,7 +72,13 @@ export const ManageTab: React.FC = () => {
 
   const handleCopyExport = async () => {
     try {
-      await window.electronAPI.clipboard.writeText(exportContent);
+      if (window.electronAPI?.clipboard) {
+        await window.electronAPI.clipboard.writeText(exportContent);
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(exportContent);
+      } else {
+        throw new Error('Clipboard not available');
+      }
       showSuccess('Exported content copied to clipboard');
     } catch (error) {
       showError('Failed to copy to clipboard');
@@ -81,6 +87,11 @@ export const ManageTab: React.FC = () => {
 
   const handleSaveExport = async () => {
     try {
+      if (!window.electronAPI?.fs) {
+        showError('File save is only available in the desktop app. Use copy to clipboard instead.');
+        return;
+      }
+
       const result = await window.electronAPI.fs.saveFile({
           content: exportContent,
           defaultPath: '.env'
@@ -204,7 +215,7 @@ export const ManageTab: React.FC = () => {
             >
               {categories.map(category => (
                 <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category}
+                  {getCategoryLabel(category)}
                 </option>
               ))}
             </select>
@@ -234,10 +245,13 @@ export const ManageTab: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4">
             <h3 className="text-lg font-semibold mb-4">Import from .env File</h3>
+            <p className="text-sm text-gray-600 mb-3">
+              Supports OpenClaw global config (<code className="text-xs bg-gray-100 px-1 rounded">~/.openclaw/.env</code>) and standard API key files.
+            </p>
             <textarea
               value={importContent}
               onChange={(e) => setImportContent(e.target.value)}
-              placeholder="Paste your .env file content here...\n\nExample:\nOPENAI_API_KEY=sk-...\nGITHUB_TOKEN=ghp_...\nSTRIPE_SECRET_KEY=sk_test_..."
+              placeholder="Paste your .env file content here (e.g. ~/.openclaw/.env)...&#10;&#10;Example:&#10;OPENCLAW_GATEWAY_TOKEN=your_token&#10;OPENAI_API_KEY=sk-...&#10;ANTHROPIC_API_KEY=sk-ant-...&#10;GEMINI_API_KEY=...&#10;TELEGRAM_BOT_TOKEN=123456:ABCDEF..."
               className="w-full h-64 p-3 border border-gray-300 rounded-md font-mono text-sm resize-none"
             />
             <div className="flex justify-end gap-2 mt-4">
