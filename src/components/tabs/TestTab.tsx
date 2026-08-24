@@ -15,7 +15,9 @@ export const TestTab: React.FC = () => {
   const { keys, testKey } = useApiKeyStore();
   const { showSuccess, showError } = useUiStore();
 
-  const configuredServices = apiServices.filter(service => keys[service.id]?.value);
+  const configuredServices = apiServices.filter(
+    (service) => keys[service.id]?.value && service.isTestable !== false && service.testEndpoint,
+  );
 
   const handleTestSingle = async (serviceId: string) => {
     setTestingServices(prev => new Set(prev).add(serviceId));

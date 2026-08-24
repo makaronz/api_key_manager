@@ -52,7 +52,7 @@ function App() {
             API Key Manager
           </h1>
           <p className="text-gray-600">
-            Securely manage your API keys with macOS Keychain integration
+            Securely manage API keys — OpenClaw (~/.openclaw/.env), trading, and cloud services
           </p>
         </div>
 

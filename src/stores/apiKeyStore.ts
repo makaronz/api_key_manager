@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { ApiKey, ApiKeyStore } from '../types';
-import { apiServices } from '../data/apiServices';
+import { apiServices, getServiceById, getServiceByKeyName } from '../data/apiServices';
 
 const KEYCHAIN_SERVICE_PREFIX = 'api-key-manager';
 
@@ -140,9 +140,13 @@ export const useApiKeyStore = create<ApiKeyStore>((set, get) => ({
   },
 
   testKey: async (service: string) => {
-    const apiService = apiServices.find(s => s.id === service);
+    const apiService = getServiceById(service);
     if (!apiService) {
       throw new Error('Service not found');
+    }
+
+    if (apiService.isTestable === false || !apiService.testEndpoint) {
+      throw new Error('This field is not testable');
     }
 
     const key = await get().getKey(service);
@@ -151,22 +155,29 @@ export const useApiKeyStore = create<ApiKeyStore>((set, get) => ({
     }
 
     try {
-      // Create test request based on service configuration
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         ...apiService.testHeaders,
       };
 
-      // Add API key to headers based on service requirements
-      if (apiService.keyName.toLowerCase().includes('bearer')) {
-        headers['Authorization'] = `Bearer ${key}`;
-      } else if (apiService.keyName.toLowerCase().includes('token')) {
-        headers['Authorization'] = `Token ${key}`;
-      } else {
+      for (const [headerName, headerValue] of Object.entries(headers)) {
+        headers[headerName] = headerValue.split('{key}').join(key);
+      }
+
+      if (apiService.keyName.toLowerCase().includes('bearer') && !headers.Authorization) {
+        headers.Authorization = `Bearer ${key}`;
+      } else if (apiService.keyName.toLowerCase().includes('token') && !headers.Authorization) {
+        headers.Authorization = `Token ${key}`;
+      } else if (
+        !Object.keys(apiService.testHeaders).length &&
+        apiService.fieldType === 'secret'
+      ) {
         headers[apiService.keyName] = key;
       }
 
-      const response = await fetch(apiService.testEndpoint, {
+      const endpoint = apiService.testEndpoint.split('{key}').join(key);
+
+      const response = await fetch(endpoint, {
         method: apiService.testMethod || 'GET',
         headers,
         body: apiService.testBody ? JSON.stringify(apiService.testBody) : undefined,
@@ -232,11 +243,7 @@ export const useApiKeyStore = create<ApiKeyStore>((set, get) => ({
           if (key && valueParts.length > 0) {
             const value = valueParts.join('=').replace(/^["']|["']$/g, '');
             
-            // Find matching service by key name
-            const service = apiServices.find(s => 
-              s.keyName.toLowerCase() === key.toLowerCase() ||
-              s.keyName.replace(/[_-]/g, '').toLowerCase() === key.replace(/[_-]/g, '').toLowerCase()
-            );
+            const service = getServiceByKeyName(key);
             
             if (service && value) {
               importedKeys[service.id] = value;

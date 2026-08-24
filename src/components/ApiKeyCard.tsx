@@ -73,20 +73,36 @@ export const ApiKeyCard: React.FC<ApiKeyCardProps> = ({ service, apiKey }) => {
     }
   };
 
+  const fieldType = service.fieldType ?? 'secret';
+  const isSecretField = fieldType === 'secret';
+  const isBooleanField = fieldType === 'boolean';
+  const canTest = service.isTestable !== false && Boolean(service.testEndpoint);
+  const inputType = isSecretField && !isVisible ? 'password' : 'text';
+
   const handleCopy = async () => {
     if (!apiKey?.value) return;
-    
+
     try {
-      await window.electronAPI.clipboard.writeText(apiKey.value);
-      showSuccess('API key copied to clipboard');
+      if (window.electronAPI?.clipboard) {
+        await window.electronAPI.clipboard.writeText(apiKey.value);
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(apiKey.value);
+      } else {
+        throw new Error('Clipboard not available');
+      }
+      showSuccess('Value copied to clipboard');
     } catch (error) {
-      showError('Failed to copy API key');
+      showError('Failed to copy to clipboard');
     }
   };
 
   const handleOpenUrl = async (url: string) => {
     try {
-      await window.electronAPI.system.openExternal(url);
+      if (window.electronAPI?.system) {
+        await window.electronAPI.system.openExternal(url);
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
     } catch (error) {
       showError('Failed to open URL');
     }
@@ -131,7 +147,12 @@ export const ApiKeyCard: React.FC<ApiKeyCardProps> = ({ service, apiKey }) => {
             </div>
             <div>
               <h3 className="card-title">{service.name}</h3>
-              <p className="card-description">{service.description}</p>
+              <p className="card-description">
+                {service.description}
+                {service.group ? (
+                  <span className="ml-2 text-xs text-gray-400">({service.group})</span>
+                ) : null}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -150,21 +171,38 @@ export const ApiKeyCard: React.FC<ApiKeyCardProps> = ({ service, apiKey }) => {
           
           {isEditing ? (
             <div className="flex gap-2">
-              <input
-                type={isVisible ? 'text' : 'password'}
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                className="input flex-1"
-                placeholder="Enter your API key..."
-                autoFocus
-              />
-              <button
-                onClick={() => setIsVisible(!isVisible)}
-                className="btn btn-outline"
-                title={isVisible ? 'Hide key' : 'Show key'}
-              >
-                {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+              {isBooleanField ? (
+                <select
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  className="input flex-1"
+                  autoFocus
+                >
+                  <option value="">Select value...</option>
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                  <option value="1">1</option>
+                  <option value="0">0</option>
+                </select>
+              ) : (
+                <input
+                  type={inputType}
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  className="input flex-1"
+                  placeholder={service.placeholder ?? `Enter ${service.keyName}...`}
+                  autoFocus
+                />
+              )}
+              {isSecretField && (
+                <button
+                  onClick={() => setIsVisible(!isVisible)}
+                  className="btn btn-outline"
+                  title={isVisible ? 'Hide value' : 'Show value'}
+                >
+                  {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              )}
               <button
                 onClick={handleSave}
                 className="btn btn-primary"
@@ -186,18 +224,18 @@ export const ApiKeyCard: React.FC<ApiKeyCardProps> = ({ service, apiKey }) => {
             <div className="flex gap-2">
               <div className="input flex-1 bg-gray-50 font-mono text-sm">
                 {apiKey?.value ? (
-                  isVisible ? apiKey.value : maskApiKey(apiKey.value)
+                  isSecretField && !isVisible ? maskApiKey(apiKey.value) : apiKey.value
                 ) : (
-                  <span className="text-gray-400">No API key configured</span>
+                  <span className="text-gray-400">Not configured</span>
                 )}
               </div>
               
-              {apiKey?.value && (
+              {apiKey?.value && isSecretField && (
                 <>
                   <button
                     onClick={() => setIsVisible(!isVisible)}
                     className="btn btn-outline"
-                    title={isVisible ? 'Hide key' : 'Show key'}
+                    title={isVisible ? 'Hide value' : 'Show value'}
                   >
                     {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -209,6 +247,16 @@ export const ApiKeyCard: React.FC<ApiKeyCardProps> = ({ service, apiKey }) => {
                     <Copy className="w-4 h-4" />
                   </button>
                 </>
+              )}
+
+              {apiKey?.value && !isSecretField && (
+                <button
+                  onClick={handleCopy}
+                  className="btn btn-outline"
+                  title="Copy to clipboard"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
               )}
               
               <button
@@ -254,7 +302,7 @@ export const ApiKeyCard: React.FC<ApiKeyCardProps> = ({ service, apiKey }) => {
             </button>
           </div>
           
-          {apiKey?.value && (
+          {apiKey?.value && canTest && (
             <button
               onClick={handleTest}
               disabled={isTesting}
